@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.EntityFrameworkCore; // Add para o EntityState funcionar
+using Microsoft.EntityFrameworkCore;
 using ProjetoAgendamento.Models;
 using ProjetoAgendamento.Repositories;
 
@@ -13,10 +13,8 @@ namespace ProjetoAgendamento.Services
         {
             using (var context = new AppDbContext())
             {
-                // Calculamos quando o novo agendamento termina
                 DateTime novoTermino = novo.DataHoraInicio.AddMinutes(novo.DuracaoMinutos);
 
-                // BUSCA POR CONFLITO:
                 bool conflito = context.Agendamentos.Any(a =>
                     novo.DataHoraInicio < a.DataHoraInicio.AddMinutes(a.DuracaoMinutos) &&
                     novoTermino > a.DataHoraInicio);
@@ -33,7 +31,6 @@ namespace ProjetoAgendamento.Services
 
         public List<Agendamento> ListarTodos()
         {
-            // ALTERAÇÃO 1: Abrindo contexto novo para buscar dados reais do Docker
             using (var context = new AppDbContext())
             {
                 return context.Agendamentos.AsNoTracking().ToList();
@@ -42,7 +39,6 @@ namespace ProjetoAgendamento.Services
 
         public Agendamento BuscarPorId(int id)
         {
-            // ALTERAÇÃO 2: Ignora o cache antigo e busca o ID atualizado
             using (var context = new AppDbContext())
             {
                 return context.Agendamentos.Find(id);
@@ -97,7 +93,6 @@ namespace ProjetoAgendamento.Services
 
         public void Atualizar(Agendamento agendamentoAtualizado)
         {
-            // ALTERAÇÃO 3: Update usando contexto novo
             using (var context = new AppDbContext())
             {
                 context.Agendamentos.Update(agendamentoAtualizado);

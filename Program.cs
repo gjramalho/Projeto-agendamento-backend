@@ -9,7 +9,6 @@ namespace ProjetoAgendamento
     {
         static void Main(string[] args)
         {
-            // Inicialização do Banco
             using (var context = new AppDbContext())
             {
                 context.Database.EnsureCreated();
@@ -62,7 +61,6 @@ namespace ProjetoAgendamento
 
                     case "2":
                         Console.WriteLine("\n--- LISTA DE AGENDAMENTOS ---");
-                        // O service agora vai usar 'using' e 'AsNoTracking', garantindo dados novos
                         foreach (var item in service.ListarTodos())
                         {
                             Console.WriteLine($"ID: {item.Id} | Cliente: {item.NomeCliente} | Status: {item.Status} | Motivo: {item.MotivoCancelamento ?? "---"}");
