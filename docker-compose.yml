@@ -1,0 +1,24 @@
+services:
+  # O nosso Banco de Dados
+  database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql_server_agendamento
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Cavalo24123#
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql_data:/var/opt/mssql # <--- ADICIONE ESTA LINHA
+
+  # O nosso Aplicativo de Console
+  app-agendamento:
+    build: .
+    container_name: app_agendamento_container
+    depends_on:
+      - database
+
+# ADICIONE ESTAS LINHAS NO FINAL DO ARQUIVO:
+volumes:
+  sql_data:
