@@ -1,0 +1,128 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+    /* 1. Cores Base (Tema White) */
+    :root {
+        --bg-main: #f3f4f6;
+        --bg-card: #ffffff;
+        --text-main: #111827;
+    }
+
+    /* 2. Tema Black - O seletor JS coloca 'black' no atributo */
+    [data-theme='black'] {
+        --bg-main: #0a0a0a;
+        --bg-card: #181818;
+        --text-main: #ffffff;
+    }
+
+    /* 3. Tema Toxic Neon */
+    [data-theme='toxic'] {
+        --bg-main: #020617;
+        --bg-card: #000000;
+        --text-main: #39FF14;
+    }
+
+    /* 4. Aplicação REAL das cores */
+    body { 
+        background-color: var(--bg-main) !important; 
+        color: var(--text-main) !important; 
+        font-family: 'Inter', sans-serif;
+        transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    .card-moderno {
+        background-color: var(--bg-card) !important;
+        color: var(--text-main) !important;
+        transition: all 0.4s ease;
+    }
+
+    /* Badge de status para garantir contraste em todos os temas */
+    .status-badge {
+        color: var(--text-main) !important;
+        border: 1.5px solid var(--text-main) !important;
+        background: transparent !important;
+        transition: color 0.4s, border-color 0.4s;
+    }
+    .status-badge.atendido {
+        border-color: #22c55e !important;
+        color: #22c55e !important;
+    }
+    .status-badge.cancelado {
+        border-color: #ef4444 !important;
+        color: #ef4444 !important;
+    }
+    .status-badge.pendente {
+        border-color: #eab308 !important;
+        color: #eab308 !important;
+    }
+    /* Estilo extra para o Neon brilhar */
+    [data-theme='toxic'] .card-moderno {
+        border: 2px solid #39FF14 !important;
+        box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+    }
+    [data-theme='toxic'] h1, [data-theme='toxic'] h2 {
+        text-shadow: 0 0 8px rgba(57, 255, 20, 0.6);
+    }
+    /* Garante contraste de botões em todos os temas */
+    .btn-principal {
+        color: var(--text-main) !important;
+        background: var(--bg-card) !important;
+        border: 1.5px solid var(--text-main) !important;
+        transition: background 0.4s, color 0.4s;
+    }
+</style>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Scheduler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 text-gray-900">
+    <nav class="bg-white dark:bg-black border-b border-gray-200 dark:border-gray-800 p-4 transition-colors duration-300">
+    <div class="container mx-auto flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-tighter text-indigo-600 font-mono">SCHEDULER_v2</h1>
+        
+        <div class="flex items-center space-x-4">
+            <select id="themeSelector" class="border-none text-sm rounded-lg p-2 focus:ring-2 focus:ring-indigo-500 cursor-pointer" style="color: var(--text-main); background: var(--bg-card);">
+                <option value="white">⚪ White</option>
+                <option value="black">⚫ Black</option>
+                <option value="toxic">☢️ Toxic Neon</option>
+            </select>
+        </div>
+    </div>
+</nav>
+
+    <div class="container mx-auto mt-8 p-4 bg-white shadow-md rounded-lg">
+        @RenderBody()
+    </div>
+
+    <footer class="text-center mt-10 p-4 text-gray-500 text-sm">
+        &copy; 2026 - Sistema de Agendamentos .NET 8
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const selector = document.getElementById('themeSelector');
+            if (!selector) return;
+
+            selector.addEventListener('change', (e) => {
+                const theme = e.target.value;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('user-theme', theme);
+            });
+
+            const savedTheme = localStorage.getItem('user-theme');
+            if (savedTheme) {
+                document.documentElement.setAttribute('data-theme', savedTheme);
+                selector.value = savedTheme;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -9,108 +9,67 @@ namespace ProjetoAgendamento.Services
 {
     public class AgendamentoService
     {
+        private readonly AppDbContext _context;
+
+        // O construtor recebe o banco de dados do ASP.NET
+        public AgendamentoService(AppDbContext context)
+        {
+            _context = context;
+        }
+
         public void Adicionar(Agendamento novo)
         {
-            using (var context = new AppDbContext())
+            DateTime novoTermino = novo.DataHoraInicio.AddMinutes(novo.DuracaoMinutos);
+
+            bool conflito = _context.Agendamentos.Any(a =>
+                novo.DataHoraInicio < a.DataHoraInicio.AddMinutes(a.DuracaoMinutos) &&
+                novoTermino > a.DataHoraInicio);
+
+            if (conflito)
             {
-                DateTime novoTermino = novo.DataHoraInicio.AddMinutes(novo.DuracaoMinutos);
-
-                bool conflito = context.Agendamentos.Any(a =>
-                    novo.DataHoraInicio < a.DataHoraInicio.AddMinutes(a.DuracaoMinutos) &&
-                    novoTermino > a.DataHoraInicio);
-
-                if (conflito)
-                {
-                    throw new Exception("Conflito de horário! Já existe um atendimento em andamento neste período.");
-                }
-
-                context.Agendamentos.Add(novo);
-                context.SaveChanges();
+                throw new Exception("Conflito de horário! Já existe um atendimento neste período.");
             }
+
+            _context.Agendamentos.Add(novo);
+            _context.SaveChanges();
         }
 
         public List<Agendamento> ListarTodos()
         {
-            using (var context = new AppDbContext())
-            {
-                return context.Agendamentos.AsNoTracking().ToList();
-            }
+            return _context.Agendamentos.AsNoTracking().ToList();
         }
 
-        public Agendamento BuscarPorId(int id)
+        public Agendamento? BuscarPorId(int id)
         {
-            using (var context = new AppDbContext())
-            {
-                return context.Agendamentos.Find(id);
-            }
-        }
-
-        public bool Cancelar(int id)
-        {
-            using (var context = new AppDbContext())
-            {
-                var agendamento = context.Agendamentos.Find(id);
-                if (agendamento == null) return false;
-
-                agendamento.Status = "Cancelado";
-                context.SaveChanges();
-                return true;
-            }
-        }
-
-        public bool FinalizarAtendimento(int id)
-        {
-            using (var context = new AppDbContext())
-            {
-                var agendamento = context.Agendamentos.FirstOrDefault(a => a.Id == id);
-
-                if (agendamento == null) return false;
-
-                agendamento.Status = "Atendido";
-
-                context.Entry(agendamento).State = EntityState.Modified;
-
-                context.SaveChanges();
-                return true;
-            }
+            return _context.Agendamentos.Find(id);
         }
 
         public bool CancelarComMotivo(int id, string motivo)
         {
-            using (var context = new AppDbContext())
-            {
-                var agendamento = context.Agendamentos.Find(id);
-                if (agendamento == null) return false;
+            var agendamento = _context.Agendamentos.Find(id);
+            if (agendamento == null) return false;
 
-                agendamento.Status = "Cancelado";
-                agendamento.MotivoCancelamento = motivo;
+            agendamento.Status = "Cancelado";
+            agendamento.MotivoCancelamento = motivo;
 
-                context.Entry(agendamento).State = EntityState.Modified;
-                context.SaveChanges();
-                return true;
-            }
+            _context.SaveChanges();
+            return true;
         }
 
-        public void Atualizar(Agendamento agendamentoAtualizado)
+        public bool FinalizarAtendimento(int id)
         {
-            using (var context = new AppDbContext())
-            {
-                context.Agendamentos.Update(agendamentoAtualizado);
-                context.SaveChanges();
-            }
+            var agendamento = _context.Agendamentos.Find(id);
+            if (agendamento == null) return false;
+
+            agendamento.Status = "Atendido";
+            _context.SaveChanges();
+            return true;
         }
 
-        public void AlterarStatus(int id, string novoStatus)
+        public void Atualizar(Agendamento agendamento)
         {
-            using (var context = new AppDbContext())
-            {
-                var agendamento = context.Agendamentos.Find(id);
-                if (agendamento != null)
-                {
-                    agendamento.Status = novoStatus;
-                    context.SaveChanges();
-                }
-            }
+            _context.Agendamentos.Update(agendamento);
+            _context.SaveChanges();
         }
     }
 }

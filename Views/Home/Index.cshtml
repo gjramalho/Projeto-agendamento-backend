@@ -1,0 +1,56 @@
+﻿@model IEnumerable<ProjetoAgendamento.Models.Agendamento>
+
+@{
+    ViewData["Title"] = "Painel de Agendamentos";
+}
+
+<div class="card-moderno p-8 rounded-3xl shadow-2xl transition-all duration-500 border border-opacity-10">
+    
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <h2 class="text-3xl font-extrabold tracking-tight italic font-mono" style="color: var(--text-main)">
+                📅 PROXIMOS_AGENDAMENTOS
+            </h2>
+            <p class="text-sm opacity-60 font-mono mt-1" style="color: var(--text-main)">Sincronizado com SQL Server (Docker)</p>
+        </div>
+
+        <button class="btn-principal group relative inline-flex items-center justify-center px-8 py-3 font-bold transition-all duration-200 rounded-xl active:scale-95 shadow-lg" style="color: var(--text-main)">
+            <span class="mr-2 text-xl">＋</span>
+            Novo Agendamento
+        </button>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full border-collapse">
+            <thead>
+                <tr class="border-b border-opacity-20 border-current">
+                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest opacity-70" style="color: var(--text-main)">Cliente</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest opacity-70" style="color: var(--text-main)">Serviço</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest opacity-70" style="color: var(--text-main)">Data/Hora</th>
+                    <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-widest opacity-70" style="color: var(--text-main)">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-opacity-10 divide-current">
+                @foreach (var item in Model)
+                {
+                    var statusClass = item.Status == "Atendido" ? "status-badge atendido" : item.Status == "Cancelado" ? "status-badge cancelado" : "status-badge pendente";
+                    <tr class="hover:bg-indigo-500 hover:bg-opacity-5 transition-colors duration-150">
+                        <td class="px-6 py-5 whitespace-nowrap font-semibold" style="color: var(--text-main)">@item.NomeCliente</td>
+                        <td class="px-6 py-5 whitespace-nowrap opacity-80" style="color: var(--text-main)">@item.Servico</td>
+                        <td class="px-6 py-5 whitespace-nowrap font-mono text-sm" style="color: var(--text-main)">@item.DataHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                        <td class="px-6 py-5 whitespace-nowrap">
+                            <span class="@statusClass px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full">
+                                @item.Status.ToUpper()
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    table { background-color: transparent !important; }
+    tr { color: inherit !important; }
+</style>
