@@ -1,25 +1,31 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjetoAgendamento.Models;
-using ProjetoAgendamento.Repositories; // resolve erro do AppDbContext
-using ProjetoAgendamento.Services;     // resolve erro do AgendamentoService
+using ProjetoAgendamento.Repositories;
+using ProjetoAgendamento.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 1. CONFIGURAÇÃO DOS SERVIÇOS (Tudo que usa 'builder')
+// Pega a string de conexão do appsettings.json
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Registra o Banco de Dados
+// Se você usar o nome completo, o erro some:
+builder.Services.AddDbContext<ProjetoAgendamento.Repositories.AppDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Registra o Service (Regras de negócio)
 builder.Services.AddScoped<AgendamentoService>();
 
-// 1. Adiciona suporte ao MVC (Telas)
+// Adiciona suporte ao MVC (Telas e Controllers)
 builder.Services.AddControllersWithViews();
 
-// 2. Registra o seu Banco de Dados (Dê o nome correto do seu Contexto)
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer("Server=localhost,1433;Database=AgendamentoDB;User Id=sa;Password=Cavalo24123#;TrustServerCertificate=True;"));
-
-//Registro do Service!
-builder.Services.AddScoped<AgendamentoService>();
-
+// ---------------------------------------------------------
+// 2. CONSTRUÇÃO DO APLICATIVO (O ponto sem retorno)
 var app = builder.Build();
+// ---------------------------------------------------------
 
-// Configurações básicas de erro e HTTPS
+// 3. CONFIGURAÇÃO DO PIPELINE (Como o app se comporta)
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -31,7 +37,7 @@ app.UseStaticFiles(); // Importante para o CSS/Tailwind funcionar
 app.UseRouting();
 app.UseAuthorization();
 
-// 3. Define a rota: se você abrir o site, ele vai procurar o Home/Index
+// Define a rota padrão
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
