@@ -3,106 +3,105 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
-    /* CSS para esconder a barra de rolagem mantendo a funcionalidade de scroll em celulares */
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
-    .no-scrollbar {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .status-select {
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.4rem center;
+        background-size: 0.8em;
     }
 
-    /* Efeito de brilho suave para os status */
-    .status-glow-pendente { shadow-[0_0_10px_rgba(234,179,8,0.3)]; border-color: rgba(234,179,8,0.5); }
-    .status-glow-atendido { shadow-[0_0_10px_rgba(34,197,94,0.3)]; border-color: rgba(34,197,94,0.5); }
-    .status-glow-cancelado { shadow-[0_0_10px_rgba(239,68,68,0.3)]; border-color: rgba(239,68,68,0.5); }
+    .opt-pendente { color: #eab308 !important; background-color: #1a1a1a !important; }
+    .opt-atendido { color: #22c55e !important; background-color: #1a1a1a !important; }
+    .opt-cancelado { color: #ef4444 !important; background-color: #1a1a1a !important; }
+
+    .status-pendente { border-color: rgba(234, 179, 8, 0.4); color: #eab308; }
+    .status-atendido { border-color: rgba(34, 197, 94, 0.4); color: #22c55e; }
+    .status-cancelado { border-color: rgba(239, 68, 68, 0.4); color: #ef4444; }
 </style>
 
-<div class="card-moderno p-4 md:p-8 animate-in fade-in duration-500">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
-        <div>
-            <h2 class="text-2xl md:text-3xl font-black font-mono uppercase italic" style="color: var(--text-main)">Agendamentos</h2>
-            <div class="h-1 w-20 bg-indigo-500 rounded-full mt-1"></div>
-        </div>
+<div class="card-moderno p-4 md:p-8 animate-in fade-in duration-500 overflow-hidden">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-10 gap-4">
+        <h2 class="text-xl md:text-2xl font-black font-mono uppercase italic tracking-tighter" style="color: var(--text-main)">
+            PAINEL DE AGENDAMENTOS
+        </h2>
         
-        <button onclick="abrirModal()" class="w-full md:w-auto group relative px-8 py-3 font-bold rounded-2xl transition-all active:scale-95 shadow-xl overflow-hidden" 
+        <button onclick="abrirModal()" class="px-5 py-2 text-[10px] font-bold rounded-full transition-all active:scale-95 shadow-md uppercase tracking-wider" 
                 style="background: var(--accent); color: #000;">
-            <span class="relative z-10">＋ NOVO_AGENDAMENTO</span>
+            Novo Agendamento
         </button>
     </div>
 
-    @* Estilo 2: Tabela sem barra visível e com espaçamento otimizado *@
     <div class="overflow-x-auto no-scrollbar">
-        <table class="w-full text-left border-separate border-spacing-y-3 min-w-[600px] md:min-w-full">
+        <table class="w-full text-left border-separate border-spacing-y-3 min-w-[700px]">
             <thead>
-                <tr class="text-[10px] uppercase tracking-widest opacity-50">
-                    <th class="px-4 pb-2">Cliente</th>
-                    <th class="px-4 pb-2">Serviço</th>
-                    <th class="px-4 pb-2 text-center">Data/Hora</th>
-                    <th class="px-4 pb-2 text-right">Status</th>
+                <tr class="text-[9px] uppercase tracking-[0.2em] opacity-30 font-black">
+                    <th class="px-6 pb-2">Cliente</th>
+                    <th class="px-6 pb-2">Serviço</th>
+                    <th class="px-6 pb-2 text-center">Data / Hora</th>
+                    <th class="px-6 pb-2 text-center">Status</th>
+                    <th class="px-6 pb-2 text-right w-10">Ações</th>
                 </tr>
             </thead>
             <tbody>
-                @if (Model != null && Model.Any()) {
+                @if (Model != null) {
                     @foreach (var item in Model) {
-                        var stClass = item.Status == "Atendido" ? "border-green-500/50 text-green-500 shadow-[0_0_8px_rgba(34,197,94,0.2)]" : 
-                                     item.Status == "Cancelado" ? "border-red-500/50 text-red-500 shadow-[0_0_8px_rgba(239,68,68,0.2)]" : 
-                                     "border-yellow-500/50 text-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.2)]";
+                        var statusClass = item.Status == "Atendido" ? "status-atendido" : 
+                                         item.Status == "Cancelado" ? "status-cancelado" : "status-pendente";
                         
-                        <tr class="group hover:scale-[1.01] transition-transform duration-200">
-                            <td class="px-4 py-4 bg-black bg-opacity-20 rounded-l-2xl font-bold text-sm md:text-base">@item.NomeCliente</td>
-                            <td class="px-4 py-4 bg-black bg-opacity-20 text-sm opacity-80">@item.Servico</td>
-                            <td class="px-4 py-4 bg-black bg-opacity-20 text-center font-mono text-xs md:text-sm">@item.DataHoraInicio.ToString("dd/MM/yy HH:mm")</td>
-                            <td class="px-4 py-4 bg-black bg-opacity-20 rounded-r-2xl text-right">
-                                <span class="inline-block px-3 py-1 border-2 rounded-full text-[10px] font-black tracking-tighter @stClass">
-                                    @item.Status.ToUpper()
-                                </span>
+                        <tr class="group hover:bg-white/[0.03] transition-all">
+                            <td class="px-6 py-5 bg-black/20 rounded-l-2xl font-bold text-sm">@item.NomeCliente</td>
+                            <td class="px-6 py-5 bg-black/20 text-xs opacity-60">@item.Servico</td>
+                            <td class="px-6 py-5 bg-black/20 text-center font-mono text-[10px]">@item.DataHoraInicio.ToString("dd/MM/yy HH:mm")</td>
+                            
+                            <td class="px-6 py-5 bg-black/20 text-center">
+                                <select id="select-@item.Id" onchange="atualizarStatus(@item.Id, this.value)" 
+                                        class="status-select border-2 rounded-full px-4 py-1 text-[9px] font-black uppercase outline-none transition-all @statusClass bg-transparent">
+                                    <option value="Pendente" class="opt-pendente" selected="@(item.Status == "Pendente")">Pendente</option>
+                                    <option value="Atendido" class="opt-atendido" selected="@(item.Status == "Atendido")">Atendido</option>
+                                    <option value="Cancelado" class="opt-cancelado" selected="@(item.Status == "Cancelado")">Cancelado</option>
+                                </select>
+                            </td>
+
+                            <td class="px-6 py-5 bg-black/20 rounded-r-2xl text-right">
+                                <button onclick="deletarAgendamento(@item.Id)" class="text-white/20 hover:text-red-500 transition-colors p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
                             </td>
                         </tr>
                     }
-                } else {
-                    <tr>
-                        <td colspan="4" class="text-center py-20 opacity-30 italic font-mono uppercase tracking-widest">
-                            Sistema Vazio // Aguardando Dados
-                        </td>
-                    </tr>
                 }
             </tbody>
         </table>
     </div>
 </div>
 
-<div id="modalAgendamento" class="fixed inset-0 z-[20000] hidden">
-    <div class="absolute inset-0 bg-black/90 backdrop-blur-xl"></div>
+<div id="modalAgendamento" class="fixed inset-0 z-[9999] hidden">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharModal()"></div>
     <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="card-moderno w-full max-w-lg p-6 md:p-10 border-2 border-indigo-500/30 bg-[#0a0a0a] shadow-2xl">
-            <h3 class="text-2xl font-black font-mono mb-8 uppercase italic" style="color: var(--text-main)">Criar Registro</h3>
-            
-            <form id="formAgendamento" class="space-y-6">
+        <div class="card-moderno w-full max-w-sm p-8 bg-[#0d0d0d] border border-white/10 shadow-2xl">
+            <h3 class="text-lg font-black font-mono mb-6 uppercase italic text-indigo-500">Novo Registro</h3>
+            <form id="formAgendamento" class="space-y-4">
                 <div>
-                    <label class="block text-[10px] font-black uppercase opacity-50 ml-1 mb-1">Nome Cliente</label>
-                    <input type="text" id="nomeCliente" required placeholder="Digite o nome..."
-                           class="w-full bg-white/5 border-b-2 border-white/10 p-3 outline-none focus:border-indigo-500 transition-all font-bold text-white placeholder:opacity-20">
+                    <label class="block text-[9px] font-black uppercase opacity-40 mb-1">Nome</label>
+                    <input type="text" id="nomeCliente" required class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
                 </div>
-                
                 <div>
-                    <label class="block text-[10px] font-black uppercase opacity-50 ml-1 mb-1">Serviço</label>
-                    <input type="text" id="servico" required placeholder="Ex: Corte de Cabelo"
-                           class="w-full bg-white/5 border-b-2 border-white/10 p-3 outline-none focus:border-indigo-500 transition-all font-bold text-white placeholder:opacity-20">
+                    <label class="block text-[9px] font-black uppercase opacity-40 mb-1">Serviço</label>
+                    <input type="text" id="servico" required class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
                 </div>
-
                 <div>
-                    <label class="block text-[10px] font-black uppercase opacity-50 ml-1 mb-1">Data e Hora</label>
-                    <input type="datetime-local" id="dataHora" required 
-                           class="w-full bg-white/5 border-b-2 border-white/10 p-3 outline-none focus:border-indigo-500 transition-all font-bold text-white">
+                    <label class="block text-[9px] font-black uppercase opacity-40 mb-1">Data/Hora</label>
+                    <input type="datetime-local" id="dataHora" required class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
                 </div>
-
-                <div class="flex justify-end items-center space-x-6 mt-10">
-                    <button type="button" onclick="fecharModal()" class="font-black text-[10px] opacity-40 hover:opacity-100 uppercase transition-all">Cancelar</button>
-                    <button type="submit" class="px-10 py-3 rounded-xl font-black text-xs active:scale-95 transition-all shadow-lg shadow-indigo-500/20" 
-                            style="background: var(--accent); color: #000;">
-                        GRAVAR_DATABASE
-                    </button>
+                <div class="flex justify-end gap-4 pt-4">
+                    <button type="button" onclick="fecharModal()" class="text-[9px] font-black uppercase opacity-40 hover:opacity-100">Sair</button>
+                    <button type="submit" id="btnSalvar" class="px-6 py-2 bg-indigo-600 text-white font-black text-[10px] rounded-md hover:bg-indigo-500">SALVAR</button>
                 </div>
             </form>
         </div>
@@ -110,15 +109,17 @@
 </div>
 
 <script>
-    function abrirModal() { 
-        document.getElementById('modalAgendamento').classList.remove('hidden'); 
-    }
-    function fecharModal() { 
-        document.getElementById('modalAgendamento').classList.add('hidden'); 
-    }
+    function abrirModal() { document.getElementById('formAgendamento').reset(); document.getElementById('modalAgendamento').classList.remove('hidden'); }
+    function fecharModal() { document.getElementById('modalAgendamento').classList.add('hidden'); }
 
-    document.getElementById('formAgendamento').addEventListener('submit', async function(e) {
+    const form = document.getElementById('formAgendamento');
+    form.addEventListener('submit', async function(e) {
         e.preventDefault();
+        e.stopImmediatePropagation();
+        const btn = document.getElementById('btnSalvar');
+        if (btn.disabled) return;
+        btn.disabled = true;
+        btn.innerText = "...";
 
         const dados = {
             NomeCliente: document.getElementById('nomeCliente').value,
@@ -126,44 +127,47 @@
             DataHoraInicio: document.getElementById('dataHora').value
         };
 
-        try {
-            const response = await fetch('/Agendamentos/CriarAgendamento', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(dados)
-            });
-
-            const result = await response.json();
-
-            if (result.success) {
-                Swal.fire({
-                    title: 'REGISTRO SALVO',
-                    text: result.message,
-                    icon: 'success',
-                    background: '#0a0a0a',
-                    color: '#fff',
-                    confirmButtonColor: '#6366f1',
-                    confirmButtonText: 'CONFIRMAR'
-                }).then(() => {
-                    location.reload(); 
-                });
-            } else {
-                Swal.fire({
-                    title: 'ERRO NO SISTEMA',
-                    text: result.message,
-                    icon: 'error',
-                    background: '#0a0a0a',
-                    color: '#fff'
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                title: 'CONEXÃO FALHOU',
-                text: 'Não foi possível contatar o servidor local.',
-                icon: 'warning',
-                background: '#0a0a0a',
-                color: '#fff'
-            });
-        }
+        const res = await fetch('/Agendamentos/CriarAgendamento', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        });
+        const result = await res.json();
+        if (result.success) location.reload();
+        else { btn.disabled = false; btn.innerText = "ERRO"; }
     });
+
+    async function atualizarStatus(id, novoStatus) {
+        const select = document.getElementById(`select-${id}`);
+        try {
+            const res = await fetch(`/Agendamentos/MudarStatus?id=${id}&novoStatus=${novoStatus}`, { method: 'POST' });
+            const result = await res.json();
+            if (result.success) {
+                select.classList.remove('status-pendente', 'status-atendido', 'status-cancelado');
+                if (novoStatus === "Atendido") select.classList.add('status-atendido');
+                else if (novoStatus === "Cancelado") select.classList.add('status-cancelado');
+                else select.classList.add('status-pendente');
+                
+                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1000, background: '#0d0d0d', color: '#fff' });
+                Toast.fire({ icon: 'success', title: 'Status Atualizado' });
+            }
+        } catch (e) { console.error("Erro no fetch."); }
+    }
+
+    function deletarAgendamento(id) {
+        Swal.fire({
+            title: 'APAGAR?',
+            text: "Essa ação é irreversível!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            background: '#0d0d0d', color: '#fff'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const res = await fetch(`/Agendamentos/Excluir?id=${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data.success) location.reload();
+            }
+        });
+    }
 </script>

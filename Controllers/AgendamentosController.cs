@@ -42,5 +42,30 @@ namespace ProjetoAgendamento.Controllers
             }
             return Json(new { success = false, message = "Dados inválidos." });
         }
+        // Rota para EXCLUIR
+        [HttpDelete]
+        public async Task<IActionResult> Excluir(int id)
+        {
+            var agendamento = await _context.Agendamentos.FindAsync(id);
+            if (agendamento == null) return Json(new { success = false, message = "Não encontrado." });
+
+            _context.Agendamentos.Remove(agendamento);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, message = "Excluído com sucesso!" });
+        }
+
+        // Rota para MUDAR STATUS
+        [HttpPost]
+        public async Task<IActionResult> MudarStatus(int id, string novoStatus)
+        {
+            var agendamento = await _context.Agendamentos.FindAsync(id);
+            if (agendamento == null) return Json(new { success = false, message = "Não encontrado." });
+
+            agendamento.Status = novoStatus;
+            _context.Agendamentos.Update(agendamento);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+        }
     }
+
 }
