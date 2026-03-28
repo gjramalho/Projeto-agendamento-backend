@@ -10,8 +10,6 @@ namespace ProjetoAgendamento.Services
     public class AgendamentoService
     {
         private readonly AppDbContext _context;
-
-        // O construtor recebe o banco de dados do ASP.NET
         public AgendamentoService(AppDbContext context)
         {
             _context = context;

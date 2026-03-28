@@ -1,60 +1,65 @@
-# Scheduler - Sistema de Agendamentos (.NET 8 + SQL Server)
+# Projeto Agendamento
 
-> Aplicação console para gestão de agendamentos com persistência em SQL Server e arquitetura em camadas.
-
-**Criador:** Gabriel Ramalho Barbosa
-
-**Objetivo:** Projeto para portfólio.
-
-## Índice
-- [Visão geral](#visão-geral)
-- [Funcionalidades](#funcionalidades)
-- [Tecnologias](#tecnologias)
-- [Estrutura do projeto](#estrutura-do-projeto)
-- [Pré-requisitos](#pré-requisitos)
-- [Como executar](#como-executar)
-- [Configuração do banco](#configuração-do-banco)
-
-## Visão geral
-Sistema desenvolvido para simular o fluxo real de uma clínica ou escritório, desde a criação do agendamento até a finalização ou cancelamento com motivo. O foco está em integridade dos dados e controle de estados.
+Sistema web para gerenciamento de agendamentos, desenvolvido com ASP.NET Core Razor Pages e Entity Framework Core. Permite cadastrar, visualizar, atualizar status e excluir agendamentos de forma simples e intuitiva.
 
 ## Funcionalidades
-- Cadastro, listagem e busca de agendamentos por ID.
-- Cancelamento com motivo e finalização de atendimento.
-- Prevenção de conflitos de horário durante o cadastro.
-- Atualização de dados refletindo as alterações no banco em tempo real.
 
-## Tecnologias
-- **Linguagem:** C# (.NET 8)
-- **ORM:** Entity Framework Core (Code First)
-- **Banco de Dados:** SQL Server em Docker
-- **Arquitetura:** Camadas (`Services`, `Repositories`, `Models`)
+- Cadastro de novos agendamentos com validação de dados
+- Listagem de agendamentos em painel moderno
+- Atualização de status (Pendente, Atendido, Cancelado)
+- Exclusão de agendamentos
+- Prevenção de conflitos de horário (intervalo mínimo de 40 minutos)
+- Feedback visual com SweetAlert2
 
-## Estrutura do projeto
-```
-ProjetoAgendamento/
-├─ Models/
-├─ Repositories/
-├─ Services/
-├─ Program.cs
-└─ README.md
-```
+## Tecnologias Utilizadas
 
-## Pré-requisitos
-- .NET SDK 8
-- Docker e Docker Compose
+- .NET 8
+- ASP.NET Core Razor Pages
+- Entity Framework Core
+- SQL Server (ou outro banco relacional)
+- SweetAlert2 (notificações)
+- HTML5, CSS3 (Tailwind/Custom), JavaScript
 
-## Como executar
-1. Clone o repositório.
-2. Inicie o SQL Server via Docker:
+## Estrutura do Projeto
+
+- `Models/Agendamento.cs`: Modelo de dados do agendamento
+- `Repositories/AppDbContext.cs`: Contexto do banco de dados
+- `Controllers/AgendamentosController.cs`: Lógica de CRUD e regras de negócio
+- `Views/Home/Index.cshtml`: Interface principal do painel de agendamentos
+- `Services/AgendamentoService.cs`: (Opcional) Lógica adicional de negócio
+
+## Como Executar
+
+1. Clone o repositório:
    ```bash
-   docker-compose up -d
+   git clone https://github.com/gjramalho/Projeto-agendamento-backend.git
    ```
-3. Execute a aplicação:
+2. Configure a string de conexão no `appsettings.json`.
+3. Execute as migrações do banco de dados:
+   ```bash
+   dotnet ef database update
+   ```
+4. Inicie o projeto:
    ```bash
    dotnet run
    ```
-4. O banco e as tabelas são criados automaticamente via `Database.EnsureCreated()` ao iniciar a aplicação.
+5. Acesse `http://localhost:5000` no navegador.
 
-## Configuração do banco
-A string de conexão está definida em `Repositories/AppDbContext.cs`. Caso necessário, ajuste usuário, senha, porta ou nome do banco para o seu ambiente.
+## Telas
+
+- Painel de agendamentos com filtro visual por status
+- Modal para novo agendamento
+- Ações rápidas para atualizar status e excluir
+
+## Validações e Regras
+
+- Não permite agendar para datas passadas
+- Impede agendamentos com intervalo menor que 40 minutos
+- Validação de campos obrigatórios e tamanho mínimo
+
+## Licença
+
+Este projeto está sob a licença MIT.
+
+---
+Desenvolvido por Gabriel Ramalho

@@ -3,7 +3,7 @@ using ProjetoAgendamento.Services;
 
 namespace ProjetoAgendamento.Controllers
 {
-    // ele vai herda de 'Controller' (com suporte a Telas/Views)
+    
     public class HomeController : Controller
     {
         private readonly AgendamentoService _service;
@@ -16,10 +16,10 @@ namespace ProjetoAgendamento.Controllers
 
         public IActionResult Index()
         {
-            //busca lista do banco
+           
             var lista = _service.ListarTodos();
 
-            //Passamos a lista para a view (HTML)
+            
             return View(lista);
         }
     }
