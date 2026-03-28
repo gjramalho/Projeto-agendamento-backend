@@ -81,27 +81,27 @@
     </div>
 </div>
 
-<div id="modalAgendamento" class="fixed inset-0 z-[9999] hidden">
+<div id="modalAgendamento" class="fixed inset-0 z-[50] hidden">
     <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="fecharModal()"></div>
     <div class="relative min-h-screen flex items-center justify-center p-4">
         <div class="card-moderno w-full max-w-sm p-8 bg-[#0d0d0d] border border-white/10 shadow-2xl">
             <h3 class="text-lg font-black font-mono mb-6 uppercase italic text-indigo-500">Novo Registro</h3>
             <form id="formAgendamento" class="space-y-4">
                 <div>
-                    <label class="block text-[9px] font-black uppercase opacity-40 mb-1">Nome</label>
-                    <input type="text" id="nomeCliente" required class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
+                    <label class="block text-[9px] font-black uppercase opacity-40 mb-1">Nome (Mín. 4 caracteres)</label>
+                    <input type="text" id="nomeCliente" class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
                 </div>
                 <div>
-                    <label class="block text-[9px] font-black uppercase opacity-40 mb-1">Serviço</label>
-                    <input type="text" id="servico" required class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
+                    <label class="block text-[9px] font-black uppercase opacity-40 mb-1">Serviço (Mín. 4 caracteres)</label>
+                    <input type="text" id="servico" class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
                 </div>
                 <div>
                     <label class="block text-[9px] font-black uppercase opacity-40 mb-1">Data/Hora</label>
-                    <input type="datetime-local" id="dataHora" required class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
+                    <input type="datetime-local" id="dataHora" class="w-full bg-white/5 border-b border-white/20 p-2 outline-none focus:border-indigo-500 text-white font-bold text-sm">
                 </div>
                 <div class="flex justify-end gap-4 pt-4">
                     <button type="button" onclick="fecharModal()" class="text-[9px] font-black uppercase opacity-40 hover:opacity-100">Sair</button>
-                    <button type="submit" id="btnSalvar" class="px-6 py-2 bg-indigo-600 text-white font-black text-[10px] rounded-md hover:bg-indigo-500">SALVAR</button>
+                    <button type="submit" id="btnSalvar" class="px-6 py-2 bg-indigo-600 text-white font-black text-[10px] rounded-md hover:bg-indigo-500 transition-all">SALVAR</button>
                 </div>
             </form>
         </div>
@@ -109,32 +109,85 @@
 </div>
 
 <script>
+    // Configuração global do Toast (igual à imagem enviada)
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        background: '#0d0d0d',
+        color: '#fff'
+    });
+
     function abrirModal() { document.getElementById('formAgendamento').reset(); document.getElementById('modalAgendamento').classList.remove('hidden'); }
     function fecharModal() { document.getElementById('modalAgendamento').classList.add('hidden'); }
 
     const form = document.getElementById('formAgendamento');
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        e.stopImmediatePropagation();
         const btn = document.getElementById('btnSalvar');
         if (btn.disabled) return;
+
+        // Captura e limpa os valores
+        const nome = document.getElementById('nomeCliente').value.trim();
+        const servico = document.getElementById('servico').value.trim();
+        const dataInput = document.getElementById('dataHora').value;
+        const dataHoraSelecionada = new Date(dataInput);
+        const agora = new Date();
+
+        // 1. Validações Locais (Front-end)
+        let erroValidacao = "";
+        if (nome.length < 4) erroValidacao = "Nome deve ter ao menos 4 letras!";
+        else if (servico.length < 4) erroValidacao = "Serviço deve ter ao menos 4 letras!";
+        else if (!dataInput) erroValidacao = "Selecione uma data e hora!";
+        else if (dataHoraSelecionada < agora) erroValidacao = "Não agende no passado!";
+
+        if (erroValidacao) {
+            btn.innerText = "ERRO";
+            btn.style.backgroundColor = "#ef4444";
+            Toast.fire({ icon: 'warning', title: erroValidacao });
+            setTimeout(() => { btn.innerText = "SALVAR"; btn.style.backgroundColor = ""; }, 2000);
+            return;
+        }
+
+        // Inicia o envio
         btn.disabled = true;
         btn.innerText = "...";
 
-        const dados = {
-            NomeCliente: document.getElementById('nomeCliente').value,
-            Servico: document.getElementById('servico').value,
-            DataHoraInicio: document.getElementById('dataHora').value
-        };
+        const dados = { NomeCliente: nome, Servico: servico, DataHoraInicio: dataInput };
 
-        const res = await fetch('/Agendamentos/CriarAgendamento', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dados)
-        });
-        const result = await res.json();
-        if (result.success) location.reload();
-        else { btn.disabled = false; btn.innerText = "ERRO"; }
+        try {
+            const res = await fetch('/Agendamentos/CriarAgendamento', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+            
+            const result = await res.json();
+
+            if (result.success) {
+                location.reload();
+            } else {
+                // Erro vindo do servidor (ex: intervalo de tempo insuficiente)
+                btn.innerText = "ERRO";
+                btn.style.backgroundColor = "#ef4444";
+                
+                Toast.fire({
+                    icon: 'error',
+                    title: result.message // Exibe a mensagem do C#
+                });
+
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerText = "SALVAR";
+                    btn.style.backgroundColor = ""; 
+                }, 2500);
+            }
+        } catch (err) {
+            btn.innerText = "ERRO";
+            btn.disabled = false;
+        }
     });
 
     async function atualizarStatus(id, novoStatus) {
@@ -148,10 +201,9 @@
                 else if (novoStatus === "Cancelado") select.classList.add('status-cancelado');
                 else select.classList.add('status-pendente');
                 
-                const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1000, background: '#0d0d0d', color: '#fff' });
                 Toast.fire({ icon: 'success', title: 'Status Atualizado' });
             }
-        } catch (e) { console.error("Erro no fetch."); }
+        } catch (e) { console.error("Erro status"); }
     }
 
     function deletarAgendamento(id) {

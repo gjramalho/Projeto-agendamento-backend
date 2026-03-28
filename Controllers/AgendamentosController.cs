@@ -29,15 +29,41 @@ namespace ProjetoAgendamento.Controllers
             {
                 try
                 {
+                    // Define o intervalo mínimo (ex: 15 minutos)
+                    int intervaloMinutos = 15;
+
+                    // Calcula o limite inferior e superior da reserva
+                    DateTime inicioJanela = novoAgendamento.DataHoraInicio.AddMinutes(-intervaloMinutos);
+                    DateTime fimJanela = novoAgendamento.DataHoraInicio.AddMinutes(intervaloMinutos);
+
+                    // Verifica se existe algum agendamento entre esses horários
+                    var conflito = await _context.Agendamentos
+                        .AnyAsync(x => x.DataHoraInicio > inicioJanela && x.DataHoraInicio < fimJanela);
+
+                    if (conflito)
+                    {
+                        return Json(new
+                        {
+                            success = false,
+                            message = $"Intervalo insuficiente! Escolha um horário com mais de {intervaloMinutos} min de diferença."
+                        });
+                    }
+
+                    // Regras de validação de texto (Opcional, caso queira garantir no servidor também)
+                    if (novoAgendamento.NomeCliente.Length < 4 || novoAgendamento.Servico.Length < 4)
+                    {
+                        return Json(new { success = false, message = "Nome e Serviço devem ter 4+ letras." });
+                    }
+
                     novoAgendamento.Status = "Pendente";
                     _context.Agendamentos.Add(novoAgendamento);
                     await _context.SaveChangesAsync();
 
-                    return Json(new { success = true, message = "Salvo no Banco!" });
+                    return Json(new { success = true });
                 }
                 catch (Exception ex)
                 {
-                    return Json(new { success = false, message = "Erro no banco: " + ex.Message });
+                    return Json(new { success = false, message = "Erro ao salvar: " + ex.Message });
                 }
             }
             return Json(new { success = false, message = "Dados inválidos." });
