@@ -57,9 +57,6 @@ Sistema web para gerenciamento de agendamentos, desenvolvido com ASP.NET Core Ra
 - Impede agendamentos com intervalo menor que 40 minutos
 - Validação de campos obrigatórios e tamanho mínimo
 
-## Licença
-
-Este projeto está sob a licença MIT.
 
 ---
 Desenvolvido por Gabriel Ramalho
